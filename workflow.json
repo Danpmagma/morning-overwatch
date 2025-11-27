@@ -1,0 +1,230 @@
+{
+  "name": "Morning Overwatch",
+  "nodes": [
+    {
+      "parameters": {
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        224,
+        80
+      ],
+      "id": "0c33f4d3-fee8-49c2-a49a-66369ad2f289",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "huihui_ai/qwen3-abliterated:14b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        224,
+        272
+      ],
+      "id": "3a7489f2-ae84-40a9-82cb-ec93bb54812f",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "n3nNjag5218Mbx04",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "danmorelos1@gmail.com",
+        "toEmail": "7146977058@vzwpix.com",
+        "subject": "Overwatch Alert",
+        "emailFormat": "text",
+        "text": "=🚧 STATUS: {{ $json.chp_summary }}\n📍 INCIDENTS: {{ $json.incident_count }} detected near San Bernardino.\n\n💀 AI INTEL: \"{{ $json.ollama_quote }}\"",
+        "options": {
+          "attachments": "data"
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        992,
+        80
+      ],
+      "id": "ce2496e5-91d3-4982-aef1-1fc94c4429bc",
+      "name": "Send Text Message",
+      "webhookId": "3eefb835-5a58-4b7c-98be-3e833855b353",
+      "credentials": {
+        "smtp": {
+          "id": "hcNrERncY1MunDfX",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -160,
+        -48
+      ],
+      "id": "56ced565-7653-4fc7-ab02-b97cd1e3ca5b",
+      "name": "Schedule Trigger",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        656,
+        256
+      ],
+      "id": "99703eb1-f2c9-4a2e-bbf1-64621f6be38f",
+      "name": "Wait",
+      "webhookId": "ed9755a4-862e-46c5-afb1-6983f009638f"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:8188/prompt",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"prompt\":{\n  \"1\": {\n    \"inputs\": {\n      \"ckpt_name\": \"dreamshaper_8.safetensors\"\n    },\n    \"class_type\": \"CheckpointLoaderSimple\",\n    \"_meta\": {\n      \"title\": \"Load Checkpoint\"\n    }\n  },\n  \"2\": {\n    \"inputs\": {\n      \"text\": \"cyberpunk art style, heavy rain, neon lights, {{ $('Ollama Chat Model').item.json.response }}, 8k masterpiece\",\n      \"clip\": [\n        \"1\",\n        1\n      ]\n    },\n    \"class_type\": \"CLIPTextEncode\",\n    \"_meta\": {\n      \"title\": \"(POSITIVE) CLIP Text Encode (Prompt)\"\n    }\n  },\n  \"3\": {\n    \"inputs\": {\n      \"text\": \"blur, low quality, ugly\",\n      \"clip\": [\n        \"1\",\n        1\n      ]\n    },\n    \"class_type\": \"CLIPTextEncode\",\n    \"_meta\": {\n      \"title\": \"(NEGATIVE) CLIP Text Encode (Prompt)\"\n    }\n  },\n  \"4\": {\n    \"inputs\": {\n      \"width\": 1024,\n      \"height\": 1024,\n      \"batch_size\": 1\n    },\n    \"class_type\": \"EmptyLatentImage\",\n    \"_meta\": {\n      \"title\": \"Empty Latent Image\"\n    }\n  },\n  \"5\": {\n    \"inputs\": {\n      \"seed\": 370413305414209,\n      \"steps\": 20,\n      \"cfg\": 8,\n      \"sampler_name\": \"euler\",\n      \"scheduler\": \"simple\",\n      \"denoise\": 1,\n      \"model\": [\n        \"1\",\n        0\n      ],\n      \"positive\": [\n        \"2\",\n        0\n      ],\n      \"negative\": [\n        \"3\",\n        0\n      ],\n      \"latent_image\": [\n        \"4\",\n        0\n      ]\n    },\n    \"class_type\": \"KSampler\",\n    \"_meta\": {\n      \"title\": \"KSampler\"\n    }\n  },\n  \"6\": {\n    \"inputs\": {\n      \"samples\": [\n        \"5\",\n        0\n      ],\n      \"vae\": [\n        \"1\",\n        2\n      ]\n    },\n    \"class_type\": \"VAEDecode\",\n    \"_meta\": {\n      \"title\": \"VAE Decode\"\n    }\n  },\n  \"7\": {\n    \"inputs\": {\n      \"filename_prefix\": \"ComfyUI\",\n      \"images\": [\n        \"6\",\n        0\n      ]\n    },\n    \"class_type\": \"SaveImage\",\n    \"_meta\": {\n      \"title\": \"Save Image\"\n    }\n  }\n}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        496,
+        80
+      ],
+      "id": "02d92361-2107-4cee-9386-0c1be9591184",
+      "name": "(ComfyUI) Order Image"
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:8188/system_stats",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        816,
+        80
+      ],
+      "id": "131835ef-6a0f-49aa-839f-5137b5dc0a27",
+      "name": "(ComfyUI) Download Image"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        32,
+        80
+      ],
+      "id": "f75cf2ea-ca30-4d8a-aae6-8e2da7e677d4",
+      "name": "When chat message received",
+      "webhookId": "7f706688-e523-4525-af2d-ea04f0382318"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "(ComfyUI) Order Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        []
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "(ComfyUI) Download Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "(ComfyUI) Order Image": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "(ComfyUI) Download Image": {
+      "main": [
+        [
+          {
+            "node": "Send Text Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ee1478fd-0c47-4ecb-ba0d-391ee3672f95",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "40eefa19381600bbd199464883991151a22397fb1aca5c8946a1cf8749e50fff"
+  },
+  "id": "933Lu0h7VA7gyUb3",
+  "tags": []
+}
