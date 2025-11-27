@@ -1,0 +1,4 @@
+n8n_data/
+ollama_data/
+comfyui_data/
+.env
