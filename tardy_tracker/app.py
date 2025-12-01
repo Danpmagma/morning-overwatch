@@ -138,5 +138,3 @@ def draw_map():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001)
-
-#open weather api key: 66ef67f20f025f8f855d5b3d99e7bdc0
