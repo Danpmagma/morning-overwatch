@@ -26,7 +26,7 @@ services:
           devices:
             - driver: nvidia
               count: 1
-              capabilities: [gpu]
+              capabilities: [ gpu ]
 
   comfyui:
     image: yanwk/comfyui-boot:cu128-slim # Specific for your RTX 5080
@@ -44,7 +44,14 @@ services:
           devices:
             - driver: nvidia
               count: 1
-              capabilities: [gpu]
+              capabilities: [ gpu ]
+
+  tardy_tracker:
+    build: ./tardy_tracker
+    ports:
+      - "5001:5000"
+    environment:
+      - OPENWEATHER_API_KEY=66ef67f20f025f8f855d5b3d99e7bdc0
 
 volumes:
   n8n_data:
